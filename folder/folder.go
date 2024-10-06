@@ -22,12 +22,16 @@ type driver struct {
 	// or preprocessed data
 
 	// example: feel free to change the data structure, if slice is not what you want
-	folders []Folder
+	folders              []Folder
+	orgIDFoldersPointers []*Folder
+	childFoldersPointers []*Folder
 }
 
 func NewDriver(folders []Folder) IDriver {
 	return &driver{
 		// initialize attributes here
-		folders: folders,
+		folders:              folders,
+		orgIDFoldersPointers: nil,
+		childFoldersPointers: nil,
 	}
 }

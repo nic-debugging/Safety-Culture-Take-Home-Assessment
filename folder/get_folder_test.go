@@ -19,7 +19,6 @@ func Test_folder_GetAllFolders(t *testing.T) {
 	assert.Equal(t, sampleFolders, allFolders)
 }
 
-// feel free to change how the unit test is structured
 func Test_folder_GetFoldersByOrgID(t *testing.T) {
 
 	const DefaultOrgIDString = "c1556e17-b7c0-45a3-a6ae-9546248fb17a"
@@ -91,6 +90,14 @@ func Test_folder_GetFoldersByOrgID(t *testing.T) {
 		},
 	}
 
+	foldersByOrgID_2 := []folder.Folder{
+		{
+			Name:  "foxtrot",
+			OrgId: OrgID_2,
+			Paths: "foxtrot",
+		},
+	}
+
 	t.Parallel()
 	tests := [...]struct {
 		testName string
@@ -106,6 +113,12 @@ func Test_folder_GetFoldersByOrgID(t *testing.T) {
 			orgID:    DefaultOrgID,
 			folders:  driverValid,
 			want:     foldersByDefaultOrgID,
+		},
+		{
+			testName: "Success case: checks if given a driver that contains a folder with given OrgID, correctly returns a list containing the folder",
+			orgID:    OrgID_2,
+			folders:  driverValid,
+			want:     foldersByOrgID_2,
 		},
 		{
 			testName: "Success case: checks if given a driver that does not contain folders with given OrgID, correctly returns an empty list",
@@ -137,11 +150,7 @@ func Test_folder_GetAllChildFolders(t *testing.T) {
 	const DefaultOrgIDString = "c1556e17-b7c0-45a3-a6ae-9546248fb17a"
 	var DefaultOrgID = uuid.FromStringOrNil(DefaultOrgIDString)
 
-	// test inputs:
-
-	// using given example in README.md
 	driverValid := []folder.Folder{
-
 		{
 			Name:  "alpha",
 			OrgId: DefaultOrgID,
@@ -207,10 +216,9 @@ func Test_folder_GetAllChildFolders(t *testing.T) {
 			testName:   "Success case: checks if given valid orgId and name given, correct child folders are returned",
 			folderName: "alpha",
 			orgID:      DefaultOrgID,
-			// maybe rename driverValid to some else
-			folders:   driverValid,
-			want:      alphaChildFolders,
-			wantError: nil,
+			folders:    driverValid,
+			want:       alphaChildFolders,
+			wantError:  nil,
 		},
 		{
 			testName:   "Success case: checks if given valid orgId and name, and given that folder has no child folders, an empty list is returned",
@@ -260,16 +268,6 @@ func Test_folder_GetAllChildFolders(t *testing.T) {
 			want:       nil,
 			wantError:  errors.New("error: There are no folders in the driver"),
 		},
-		{
-			testName:   "Fail case: checks if given an empty ",
-			folderName: "alpha",
-			orgID:      uuid.Nil,
-			folders:    emptyList,
-			want:       nil,
-			wantError:  errors.New("error: There are no folders in the driver"),
-		},
-
-		// invalid path test case
 	}
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
@@ -278,9 +276,11 @@ func Test_folder_GetAllChildFolders(t *testing.T) {
 			childFolders, err := f.GetAllChildFolders(test.orgID, test.folderName)
 
 			if test.wantError == nil {
+				// for success cases, check if output is correct
 				assert.Equal(t, test.want, childFolders)
 				assert.NoError(t, err)
 			} else {
+				// for fail cases, check if error is correct
 				assert.EqualError(t, err, test.wantError.Error())
 			}
 		})

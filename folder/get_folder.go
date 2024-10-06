@@ -15,14 +15,20 @@ func (f *driver) GetFoldersByOrgID(orgID uuid.UUID) []Folder {
 	folders := f.folders
 
 	res := []Folder{}
-	for _, f := range folders {
-		if f.OrgId == orgID {
-			res = append(res, f)
+	for i := range folders {
+
+		// storing pointers to f.folders folders with orgID
+		// for GetAllChildFolders to use
+		folder := &f.folders[i]
+
+		if folder.OrgId == orgID {
+			res = append(res, *folder)
+
+			f.orgIDFoldersPointers = append(f.orgIDFoldersPointers, folder)
 		}
 	}
 
 	return res
-
 }
 
 func (f *driver) GetAllChildFolders(orgID uuid.UUID, name string) (childFolders []Folder, err error) {
@@ -63,26 +69,32 @@ func (f *driver) GetAllChildFolders(orgID uuid.UUID, name string) (childFolders 
 	}
 
 	if !folderInOrgExists {
-		// here, the folder exists so it passed the if statement above
-		// but is in another organization.
 		var err error = errors.New("error: Folder does not exist in the specified organization")
 		return nil, err
 	}
 
-	orgIDFolders := f.GetFoldersByOrgID(orgID)
+	// we are not using the output of GetFoldersByOrgID,
+	// we are using the field it initializes in f.orgIDFoldersPointers below
+	f.GetFoldersByOrgID(orgID)
 
-	// start with length 0, since there can be 0 valid child folders
-	// and we can always make slice longer
 	childFolders = make([]Folder, 0)
 
-	for _, folder := range orgIDFolders {
+	// reset pointers from previous function call!
+	f.childFoldersPointers = nil
 
-		// name is the prefix of the given folder, and if current
-		// orgIDFolder has the prefix and a "." afterwards,
-		// it means it is a child of the folder.
+	for _, folder := range f.orgIDFoldersPointers {
 
-		if strings.HasPrefix(folder.Paths, name+".") {
-			childFolders = append(childFolders, folder)
+		// Example:
+		// name+"." = bravo.
+		// folder.Paths = alpha.bravo.charlie
+		// --> charlie is a child of bravo
+
+		if strings.Contains((*folder).Paths, name+".") {
+
+			childFolders = append(childFolders, *folder)
+
+			// used in MoveFolder function
+			f.childFoldersPointers = append(f.childFoldersPointers, folder)
 		}
 	}
 
