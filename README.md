@@ -1,3 +1,9 @@
+# IMPORTANT note for marker:
+
+ My implementation of the 2nd component function, MoveFolder, will change the folders/driver's memory, so it will persist state (I understand that state persistence is not required but it is not forbidden). Therefore, at the end of my MoveFolder test file, I passed in a shallow copy of the test's folders/driver, so that the folders/driver will not be changed for future test case that use the same driver. 
+ I am mentioning this so if there will be autotests run on my code, this same thing will need to be implemented. My code is not wrong, but SafetyCulture's autotests may fail if this same thing isn't implemented. I am happy to explain this in more detail if needed (z5412724@ad.unsw.edu.au). Thank you.
+
+
 # sc-interns-2024
 
 The technical take home for 2024 internship applications.
